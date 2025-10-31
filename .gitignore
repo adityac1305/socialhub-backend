@@ -1,0 +1,68 @@
+# ========================
+# Node.js dependencies
+# ========================
+node_modules/
+**/node_modules/
+
+# ========================
+# Environment files
+# ========================
+.env
+**/.env
+.env.local
+.env.*.local
+**/.env.local
+**/.env.*.local
+
+# ========================
+# Build and output folders
+# ========================
+dist/
+build/
+**/dist/
+**/build/
+.cache/
+.nyc_output/
+coverage/
+**/coverage/
+
+# ========================
+# Logs and temporary files
+# ========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tmp
+*.temp
+*.bak
+*.pid
+*.seed
+*.pid.lock
+
+# ========================
+# Docker / container files
+# ========================
+docker-compose.override.yml
+**/docker-compose.override.yml
+
+# ========================
+# IDE / editor settings
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ========================
+# OS files
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Optional lock files
+# Uncomment these if each service manages its own dependencies
+# package-lock.json
+# yarn.lock
