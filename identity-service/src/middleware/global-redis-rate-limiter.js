@@ -8,7 +8,7 @@ const logger = require('../utils/logger');
 // rate-limiter-flexible counts and limits the number of actions by key and protects from DoS and brute force attacks at any scale.
 const rateLimiter = new RateLimiterRedis({
     storeClient : redisClient,   // Uses Redis to Store request data
-    keyPrefix : 'middleware',   // Groups limiter keys in Redis. This helps identify or seperate this limiter's data from other redis data.
+    keyPrefix : 'identity-service-middleware',   // Groups limiter keys in Redis. This helps identify or seperate this limiter's data from other redis data.
     points : 100,               // Number of requests allowed per key/IP or per user
     duration : 60,              // Time window in seconds for making 100 requests
     blockDuration : 60,         // Time window in seconds for blocking IP after reaching 100 requests in time window

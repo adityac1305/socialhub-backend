@@ -27,6 +27,7 @@ const sensitveEndpointsRateLimiter = expressrateLimit({
 
     store: new RedisStore({
         sendCommand: (...args) => redisClient.call(...args),
+        prefix: 'identity-service-sensitive-endpoint-rate-limiter',
     }),
     
 });
