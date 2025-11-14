@@ -6,7 +6,7 @@ const RefreshToken = require('../models/RefreshToken');
 
 // This function accepts a user object and will generate 2 tokens - access token and refresh token
 
-const generateTokens = async (user) => {
+const generateTokens = async (user, deviceId = 'default') => {
     
     // Creates a JWT token containing user data as claims and signs it using JWT_SECRET
 
@@ -24,7 +24,14 @@ const generateTokens = async (user) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
 
+    // Upsert refresh token document (one per user-device pair)
+    await RefreshToken.findOneAndUpdate(
+        {user : user._id, deviceId},
+        {token : refreshToken, expiresAt},
+        {upsert : true, new : true}
+    );
 
+    /*
     // Saves the refresh token to the database
     await RefreshToken.create({
         token : refreshToken,
@@ -32,6 +39,7 @@ const generateTokens = async (user) => {
         expiresAt
     });
 
+    */
     return {accessToken, refreshToken};
 };
 
