@@ -1,0 +1,74 @@
+
+
+
+const multer = require('multer');
+const logger = require('../utils/logger');
+
+
+
+/*
+multer handles parsing files sent from the client (multipart/form-data) and makes them available as req.file(single file) or req.files(mutliple files)
+
+storage: multer.memoryStorage():
+
+Tells Multer to store uploaded files in memory instead of saving them on disk.
+The file is available as a buffer (req.file.buffer).
+
+limits: { fileSize: 5 * 1024 * 1024 } :
+
+Sets a maximum file size limit (in bytes).
+5 * 1024 * 1024 = 5 MB.
+If a client tries to upload a bigger file, Multer will throw an error (MulterError).
+
+
+.single('file') :
+
+Specifies that you expect only a single file in this request.
+'file' → the name of the form field sent by the client.
+The uploaded file will be available in req.file.
+
+*/
+
+const upload = multer({
+    storage : multer.memoryStorage(),
+    limits : {
+        fileSize : 10 * 1024 * 1024
+    }
+}).single('file');
+
+
+// This middleware just gets the file from the request and makes it available in req.file for the controller to use.
+
+const handleUploadError = (req, res, next) => {
+    upload(req, res, function(err) {
+        if (err instanceof multer.MulterError) {
+            logger.error('Multer error while uploading file',err);
+            return res.status(400).json({
+                message : 'Multer error while uploading file',
+                error : err.message,
+                stack: err.stack,
+            });
+        } else if (err) {
+            logger.error(err.message);
+            return res.status(500).json({
+                message : err.message,
+                error: err.message,
+                stack: err.stack
+            });
+        }
+
+        if(!req.file) {
+            logger.error('No file uploaded. Please upload a file.');    
+            return res.status(400).json({
+                success : false,
+                message : 'No file uploaded'
+            });
+        }
+        next();
+    });
+}
+
+
+module.exports = {
+    handleUploadError
+};
