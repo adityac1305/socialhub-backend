@@ -8,6 +8,7 @@ const connectToDB = require('./config/db');
 const redisClient = require('./config/redis');
 const postRoutes = require('./routes/post-routes');
 const errorHandler = require('./middleware/errorHandler');
+const {connectToRabbitMQ, publishEvent} = require('./utils/rabbitmq');
 
 
 
@@ -50,9 +51,26 @@ app.use('/api/posts', (req, res, next) => {
 app.use(errorHandler);
 
 
-app.listen(PORT, () => {
-    logger.info(`Post Service is running on port ${PORT}`);
-});
+
+async function startServer() {
+    try {
+        
+        // Connect to RabbitMQ
+        await connectToRabbitMQ();
+
+
+        // Start the server
+        app.listen(PORT, () => {
+            logger.info(`Post Service is running on port ${PORT}`);
+        });
+
+    } catch (error) {
+        logger.error(error);
+        process.exit(1);
+    }
+}
+
+startServer();
 
 
 

@@ -62,12 +62,27 @@ const uploadMediaToCloudinary = (file) => {
 
         // Send this file data through the pipe to Cloudinary, and then close the pipe.
         uploadStream.end(file.buffer);
-        
+
     });
 };
 
 
+const deleteMediaFromCloudinary = async (publicId) => {
+    try{
+        
+        const result = await cloudinary.uploader.destroy(publicId);
+        logger.info("Deleted Media From Cloudinary Cloud Storage Successfully",publicId);
+        return result    
+
+    }catch(error){
+        logger.error("Error While Deleting Media From Cloudinary",error);
+        throw error;
+    }
+};
 
 
 
-module.exports = uploadMediaToCloudinary;
+module.exports = {
+    uploadMediaToCloudinary,
+    deleteMediaFromCloudinary
+};

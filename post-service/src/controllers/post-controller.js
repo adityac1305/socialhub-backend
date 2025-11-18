@@ -4,6 +4,7 @@ const Post = require('../models/Post');
 const logger = require('../utils/logger');
 const { validateCreatePost } = require('../utils/validation');
 const redisClient = require('../config/redis');
+const {publishEvent} = require('../utils/rabbitmq');
 
 
 // Invalidate Redis Cache
@@ -204,6 +205,16 @@ const deletePost = async (req, res) => {
                 message : 'Post not found'
             });
         }
+
+
+        // Publish the event to RabbitMQ
+        await publishEvent('post.deleted', {
+            postId : post._id.toString(),
+            userId : req.user.userId,
+            mediaIds : post.mediaIds
+        });
+
+
 
         // Remove the post from the cache
         await invalidatePostCache(req, req.params.id);
