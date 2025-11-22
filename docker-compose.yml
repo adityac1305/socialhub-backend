@@ -13,8 +13,10 @@ services:
       - "3000:3000" # Maps host port 3000 to container port 3000 so you can access it externally.
     env_file: ./api-gateway/.env         # Load environment variables from the .env file
     depends_on:           # depends_on ensures that Redis and RabbitMQ are running before the API Gateway container starts.
-      - redis
-      - rabbitmq
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379                  # Points to the Redis container
       - RABBITMQ_URL=amqp://rabbitmq:5672             # Points to the RabbitMQ container
@@ -28,8 +30,10 @@ services:
       - "3001:3001"
     env_file: ./identity-service/.env
     depends_on:
-      - redis
-      - rabbitmq
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq:5672
@@ -41,8 +45,10 @@ services:
       - "3002:3002"
     env_file: ./post-service/.env
     depends_on:
-      - redis
-      - rabbitmq
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq:5672
@@ -54,8 +60,10 @@ services:
       - "3003:3003"
     env_file: ./media-service/.env
     depends_on:
-      - redis
-      - rabbitmq
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq:5672
@@ -67,8 +75,10 @@ services:
       - "3004:3004"
     env_file: ./search-service/.env
     depends_on:
-      - redis
-      - rabbitmq
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://rabbitmq:5672
@@ -79,6 +89,11 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 
 
