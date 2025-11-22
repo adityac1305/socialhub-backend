@@ -1,0 +1,98 @@
+
+
+# Specifies the Compose file format version to use
+# Version 3.8 is compatible with Docker 18.06.0+ and supports modern features like depends_on, healthcheck, etc.
+version: '3.8'
+
+# This section defines all the containers that will be run.
+services:
+
+  api-gateway:
+    build: ./api-gateway # Build the Docker image from Dockerfile in ./api-gateway
+    ports:
+      - "3000:3000" # Maps host port 3000 to container port 3000 so you can access it externally.
+    env_file: ./api-gateway/.env         # Load environment variables from the .env file
+    depends_on:           # depends_on ensures that Redis and RabbitMQ are running before the API Gateway container starts.
+      - redis
+      - rabbitmq
+    environment:
+      - REDIS_URL=redis://redis:6379                  # Points to the Redis container
+      - RABBITMQ_URL=amqp://rabbitmq:5672             # Points to the RabbitMQ container
+
+  
+  # The other microservices (identity-service, post-service, media-service, search-service) follow the same pattern, just with different ports and directories.
+
+  identity-service:
+    build: ./identity-service
+    ports:
+      - "3001:3001"
+    env_file: ./identity-service/.env
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+
+
+  post-service:
+    build: ./post-service
+    ports:
+      - "3002:3002"
+    env_file: ./post-service/.env
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+
+
+  media-service:
+    build: ./media-service
+    ports:
+      - "3003:3003"
+    env_file: ./media-service/.env
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+
+
+  search-service:
+    build: ./search-service
+    ports:
+      - "3004:3004"
+    env_file: ./search-service/.env
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+
+
+  # This section defines the Redis container.
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+
+
+
+  # This section defines the RabbitMQ container.
+  # If we use rabbitmq:latest , it only includes the core RabbitMQ server(the broker itself), but no management UI is included by default.
+  # If we use rabbitmq:3-management, it includes the core RabbitMQ server and the management UI (pre-installed)
+  rabbitmq:
+    image: rabbitmq:4.2.0-management 
+    ports:
+      - "5672:5672"      # RabbitMQ messaging port (AMQP)
+      - "15672:15672"    # RabbitMQ management UI port
+    healthcheck:                # Docker will periodically check if RabbitMQ is healthy
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]   # It returns success if RabbitMQ is healthy
+      interval: 30s     # check every 30 seconds  
+      timeout: 10s      # consider the RabbitMQ unhealthy if it doesn't respond in 10 seconds
+      retries: 5        # retry up to 5 times
