@@ -10,7 +10,7 @@ const redisClient = new Redis({
     port : process.env.REDIS_PORT || 6379,
     password : process.env.REDIS_PASSWORD || undefined,
     db : process.env.REDIS_DB || 0,
-    keyPrefix : process.env.REDIS_PREFIX || 'identity-service',
+    keyPrefix : process.env.REDIS_PREFIX || 'api-gateway',
     retryStrategy : (times) => {
         return Math.min(times * 50, 2000);
     }

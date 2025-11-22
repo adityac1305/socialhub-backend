@@ -5,13 +5,13 @@ const logger = require('../utils/logger');
 
 
 // IP based rate limiting for sensitive endpoints
-const sensitveEndpointsRateLimiter = expressrateLimit({
+const apiGatewayEndpointsRateLimiter = expressrateLimit({
     windowMs : 15 * 60 * 1000, // 15 minutes
-    max : 5,                   // limit each IP to 5 requests per windowMs
+    max : 100,                   // limit each IP to 5 requests per windowMs
     standardHeaders : true,    // Return rate limit info in the `RateLimit-*` headers for clients to see remaining quota.
     legacyHeaders : false,     // Disable the `X-RateLimit-*` headers
     handler: (req, res) => {
-        logger.warn(` Sensitvie endpoint rate limit exceeded for IP: ${req.ip}`);  
+        logger.warn(` api-gateway endpoint rate limit exceeded for IP: ${req.ip}`);  
         res.status(429).json({
             success : false, 
             message : 'Too many requests, please try again later' 
@@ -27,9 +27,9 @@ const sensitveEndpointsRateLimiter = expressrateLimit({
 
     store: new RedisStore({
         sendCommand: (...args) => redisClient.call(...args),
-        prefix: 'identity-service-sensitive-endpoint-rate-limiter',
+        prefix: 'api-gateway-rate-limiter',
     }),
     
 });
 
-module.exports = sensitveEndpointsRateLimiter;
+module.exports = apiGatewayEndpointsRateLimiter;
