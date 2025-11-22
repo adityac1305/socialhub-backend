@@ -60,6 +60,19 @@ const createPost = async (req, res) => {
         // Saving the newly created post to MongoDB
         await newlyCreatedPost.save();
 
+
+
+        // Publish post.created event to RabbitMQ
+        await publishEvent('post.created', {
+            postId : newlyCreatedPost._id.toString(),
+            userId : newlyCreatedPost.user.toString(),
+            content : newlyCreatedPost.content,
+            createdAt : newlyCreatedPost.createdAt,
+        });
+
+
+
+
         // Invalidate Redis Cache
         // We need to invalidate the cache when a new post is created/updated/deleted because new post creation/update/deletion is not reflected in the get all posts cache.
         // Without invalidation, getAllPosts could return stale posts to users.
