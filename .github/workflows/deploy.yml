@@ -89,7 +89,6 @@ jobs:
             export REDIS_PREFIX_MEDIA_SERVICE=${{ secrets.REDIS_PREFIX_MEDIA_SERVICE }}
             export REDIS_PREFIX_SEARCH_SERVICE=${{ secrets.REDIS_PREFIX_SEARCH_SERVICE }}
 
-
             docker-compose down
             docker-compose up -d
 
