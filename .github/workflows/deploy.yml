@@ -58,7 +58,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           script: |
             cd /home/root/projects/Full_Stack/Javascript/SocialHub/socialhub-backend
             git pull
