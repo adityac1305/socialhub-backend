@@ -11,15 +11,27 @@ services:
     build: ./api-gateway # Build the Docker image from Dockerfile in ./api-gateway
     ports:
       - "3000:3000" # Maps host port 3000 to container port 3000 so you can access it externally.
-    env_file: ./api-gateway/.env         # Load environment variables from the .env file
+    #env_file: ./api-gateway/.env         # Load environment variables from the .env file
+    environment:
+      PORT: ${API_GATEWAY_PORT}
+      IDENTITY_SERVICE_URL: ${IDENTITY_SERVICE_URL}
+      POST_SERVICE_URL: ${POST_SERVICE_URL}
+      MEDIA_SERVICE_URL: ${MEDIA_SERVICE_URL}
+      SEARCH_SERVICE_URL: ${SEARCH_SERVICE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV}
+      MONGODB_URI: ${MONGODB_URI}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_PREFIX: ${REDIS_PREFIX_API_GATEWAY}
+      REDIS_URL: ${REDIS_URL}                  # Points to the Redis container
+      RABBITMQ_URL: ${RABBITMQ_URL}             # Points to the RabbitMQ container
     depends_on:           # depends_on ensures that Redis and RabbitMQ are running before the API Gateway container starts.
       redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    environment:
-      - REDIS_URL=redis://redis:6379                  # Points to the Redis container
-      - RABBITMQ_URL=amqp://rabbitmq:5672             # Points to the RabbitMQ container
 
   
   # The other microservices (identity-service, post-service, media-service, search-service) follow the same pattern, just with different ports and directories.
@@ -28,60 +40,93 @@ services:
     build: ./identity-service
     ports:
       - "3001:3001"
-    env_file: ./identity-service/.env
-    depends_on:
+    #env_file: ./identity-service/.env
+    environment:
+      PORT: ${IDENTITY_SERVICE_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV}
+      MONGODB_URI: ${MONGODB_URI}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_PREFIX: ${REDIS_PREFIX_IDENTITY_SERVICE}
+      REDIS_URL: ${REDIS_URL}                  # Points to the Redis container
+      RABBITMQ_URL: ${RABBITMQ_URL} 
+    depends_on:           # depends_on ensures that Redis and RabbitMQ are running before the API Gateway container starts.
       redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    environment:
-      - REDIS_URL=redis://redis:6379
-      - RABBITMQ_URL=amqp://rabbitmq:5672
-
 
   post-service:
     build: ./post-service
     ports:
       - "3002:3002"
-    env_file: ./post-service/.env
-    depends_on:
+    #env_file: ./post-service/.env
+    environment:
+      PORT: ${POST_SERVICE_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV}
+      MONGODB_URI: ${MONGODB_URI}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_PREFIX: ${REDIS_PREFIX_POST_SERVICE}
+      REDIS_URL: ${REDIS_URL}                  # Points to the Redis container
+      RABBITMQ_URL: ${RABBITMQ_URL} 
+    depends_on:           # depends_on ensures that Redis and RabbitMQ are running before the API Gateway container starts.
       redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    environment:
-      - REDIS_URL=redis://redis:6379
-      - RABBITMQ_URL=amqp://rabbitmq:5672
-
 
   media-service:
     build: ./media-service
     ports:
       - "3003:3003"
-    env_file: ./media-service/.env
-    depends_on:
+    #env_file: ./media-service/.env
+    environment:
+      PORT: ${MEDIA_SERVICE_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV}
+      MONGODB_URI: ${MONGODB_URI}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      CLOUDINARY_URL: ${CLOUDINARY_URL}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_PREFIX: ${REDIS_PREFIX_MEDIA_SERVICE}
+      REDIS_URL: ${REDIS_URL}                  # Points to the Redis container
+      RABBITMQ_URL: ${RABBITMQ_URL} 
+    depends_on:           # depends_on ensures that Redis and RabbitMQ are running before the API Gateway container starts.
       redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    environment:
-      - REDIS_URL=redis://redis:6379
-      - RABBITMQ_URL=amqp://rabbitmq:5672
-
 
   search-service:
     build: ./search-service
     ports:
       - "3004:3004"
-    env_file: ./search-service/.env
-    depends_on:
+    #env_file: ./search-service/.env
+    environment:
+      PORT: ${SEARCH_SERVICE_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV}
+      MONGODB_URI: ${MONGODB_URI}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_PREFIX: ${REDIS_PREFIX_SEARCH_SERVICE}
+      REDIS_URL: ${REDIS_URL}                  # Points to the Redis container
+      RABBITMQ_URL: ${RABBITMQ_URL} 
+    depends_on:           # depends_on ensures that Redis and RabbitMQ are running before the API Gateway container starts.
       redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    environment:
-      - REDIS_URL=redis://redis:6379
-      - RABBITMQ_URL=amqp://rabbitmq:5672
 
 
   # This section defines the Redis container.
