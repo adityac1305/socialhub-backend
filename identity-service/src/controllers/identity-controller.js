@@ -5,6 +5,42 @@ const logger = require('../utils/logger');
 const {validationRegistration, validateLogin} = require('../utils/validation');
 const generateTokens = require('../utils/generateToken');
 
+/*
+
+The device ID is not provided by the browser or HTTP protocol. 
+It must be generated and managed by the client and explicitly sent to your backend.
+
+####################################################
+
+It is generated in the following way in Frontend code:
+We generate the UUID and store it in persistent client storage such as local storage.
+local storage persists across browser sessions or cookies with long expiration.
+
+let deviceId = localStorage.getItem('deviceId');
+if(!deviceId) {
+  deviceId = crypto.randomUUID();
+  localStorage.setItem('deviceId', deviceId);
+}
+
+####################################################
+
+Then we send deviceId in the request header as follows to backend
+
+fetch('/api/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-device-id': deviceId
+  },
+  body: JSON.stringify({ email, password })
+
+});
+
+
+*/
+
+// The following code is used to get the device ID from the request headers passed from Postman tool
+const getDeviceId = (req) => req.headers['x-device-id'] || 'default';
 
 
 // User Registration Controller
@@ -54,9 +90,12 @@ const registerUser = async (req, res) => {
         await user.save();
         logger.info('User registration completed successfully', user._id);
 
+
+        const deviceId = getDeviceId(req);
+
         
         // Generating access token and refresh token from generateTokens utility
-        const {accessToken, refreshToken} = await generateTokens(user);
+        const {accessToken, refreshToken} = await generateTokens(user, deviceId);
 
         return res.status(201).json({
             success : true,
@@ -116,8 +155,11 @@ const loginUser = async (req, res) => {
         };
 
 
+        // Assigning device id
+        const deviceId = getDeviceId(req);
+
         // Generating access token and refresh token from generateTokens utility
-        const {accessToken, refreshToken} = await generateTokens(user);
+        const {accessToken, refreshToken} = await generateTokens(user, deviceId);
 
         return res.status(200).json({
             success : true,
@@ -146,6 +188,7 @@ const refreshTokenUser = async (req, res) => {
 
         // Assigning user input to variables
         const {refreshToken} = req.body;
+        const deviceId = getDeviceId(req);
 
         // Checking if refresh token is provided
         if(!refreshToken){
@@ -158,7 +201,7 @@ const refreshTokenUser = async (req, res) => {
 
 
         // Getting old refresh token from database and deleting it so we app can issue new tokens
-        const storedToken = await RefreshToken.findOneAndDelete({token : refreshToken});
+        const storedToken = await RefreshToken.findOneAndDelete({token : refreshToken, deviceId});
         
         // Checking if refresh token is valid
         if(!storedToken || storedToken.expiresAt < Date.now()){
@@ -182,9 +225,11 @@ const refreshTokenUser = async (req, res) => {
 
 
         // Generating new access token and refresh token from generateTokens utility
-        const {accessToken: newAccessToken, refreshToken: newRefreshToken} = await generateTokens(user);
+        const {accessToken: newAccessToken, refreshToken: newRefreshToken} = await generateTokens(user, deviceId);
 
         res.json({
+            success : true,
+            message : 'Tokens refreshed successfully',
             accessToken : newAccessToken,
             refreshToken : newRefreshToken
         });
@@ -207,6 +252,7 @@ const logoutUser = async (req, res) => {
 
         // Assigning user input to variables
         const {refreshToken} = req.body;
+        const deviceId = getDeviceId(req);
 
         // Checking if refresh token is provided
         if(!refreshToken){
@@ -220,7 +266,8 @@ const logoutUser = async (req, res) => {
 
         // Getting refresh token from database and deleting it
         const storedToken = await RefreshToken.findOneAndDelete({
-            token : refreshToken
+            token : refreshToken,
+            deviceId
         });
         
 
@@ -248,7 +295,6 @@ const logoutUser = async (req, res) => {
         });
     }
 }
-
 
 
 

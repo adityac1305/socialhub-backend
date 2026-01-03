@@ -18,6 +18,13 @@ const refreshTokenSchema = new mongoose.Schema({
         ref : 'User',
         required : true
     },
+
+    deviceId : {
+        type : String,
+        required : true,
+        index : true  // For quick lookup per device
+    },
+
     createdAt : {
         type : Date,
         default : Date.now
@@ -43,6 +50,7 @@ const refreshTokenSchema = new mongoose.Schema({
 
 
 refreshTokenSchema.index({ expiresAt : 1 }, { expireAfterSeconds : 0 });
+refreshTokenSchema.index({ user : 1, deviceId : 1 }, { unique : true });
 
 
 const RefreshToken = mongoose.model('RefreshToken', refreshTokenSchema, 'RefreshTokens');
